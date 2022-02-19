@@ -1,37 +1,37 @@
-from heuristics import select_unassigned_variable, order_domain_values
-from utils import is_consistent, assign, unassign
+from Utility import selectMostConstrainedVariable, orderDomainValues, isConsistent, assign, unassign
 
-"""
-Backtracking Algorithm
-pseudo code found @ https://sandipanweb.files.wordpress.com/2017/03/im31.png
-"""
-def recursive_backtrack_algorithm(assignment, sudoku):
+#Supposes assignments, and then backtracks and tries again through the possibilities
+#Uses recursion to test all possibilities until a solution is found or all possibilities have been tried and none exists
+def backtrackRecursion(assignment, sudoku):
 
-    # if assignment is complete then return assignment
+    #If the assignment is the same size as the sudoku, we know we have solved it and can return the result
     if len(assignment) == len(sudoku.cells):
         return assignment
 
-    # var = select-unassigned-variables(csp)
-    cell = select_unassigned_variable(assignment, sudoku)
+    #Decide what variable to work with (MRV)
+    cell = selectMostConstrainedVariable(assignment, sudoku)
 
-    # for each value in order-domain-values(csp, var)
-    for value in order_domain_values(sudoku, cell):
+    #Pick an assignement that causes the least conflicts...
+    for value in orderDomainValues(sudoku, cell):
 
-        # if value is consistent with assignment
-        if is_consistent(sudoku, assignment, cell, value):
+        #...If there are no conflicts with this assignment, then...
+        if isConsistent(sudoku, assignment, cell, value):
 
-            # add {cell = value} to assignment
+            #...Add this assignment supposition to our proposed solution...
             assign(sudoku, cell, value, assignment)
 
-            # result = backtrack(assignment, csp)
-            result = recursive_backtrack_algorithm(assignment, sudoku)
+            #...and keep going to until we find a solution.
+            result = backtrackRecursion(assignment, sudoku)
 
-            # if result is not a failure return result
+            #...If continuing forward finds a solution, we return the assignment of that solution
             if result:
                 return result
 
-            # remove {cell = value} from assignment
+            #...If we find the current assignment does conflict with something, we undo it and try to pick another
             unassign(sudoku, cell, assignment)
    
-    # return failure
+    #If we made it here, that means we...
+    #-went through all possible values for the curent cell
+    #-continued through the algorithm to the end of all the possibilities of every cell from then on by calling recursively
+    #-and STILL coulnd't find a solution, therefore it doesn't exist, so return failure
     return False
